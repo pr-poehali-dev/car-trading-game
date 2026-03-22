@@ -411,18 +411,80 @@ function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-const CAR_PHOTO_THEMES = [
-  'front view on showroom floor',
-  'side profile on city street',
-  'rear view at sunset',
-  'interior dashboard cockpit',
-  'engine bay close-up',
-];
+// Маппинг марок на Unsplash-поисковые запросы для релевантных фото
+const BRAND_PHOTO_QUERIES: Record<string, string[]> = {
+  ferrari: ['ferrari supercar red','ferrari 296 gtb','ferrari roma interior','ferrari engine bay','ferrari rear spoiler'],
+  lamborghini: ['lamborghini huracan','lamborghini urus suv','lamborghini yellow supercar','lamborghini interior cockpit','lamborghini rear'],
+  mclaren: ['mclaren 720s','mclaren sports car orange','mclaren gt road','mclaren interior','mclaren engine'],
+  bugatti: ['bugatti chiron','bugatti blue supercar','bugatti veyron road','bugatti interior luxury','bugatti engine w16'],
+  pagani: ['pagani huayra','pagani zonda exotic','pagani carbon fiber','pagani interior wood','pagani exhaust'],
+  koenigsegg: ['koenigsegg jesko','koenigsegg swedish supercar','koenigsegg ghost','koenigsegg interior','koenigsegg engine'],
+  rollsroyce: ['rolls royce phantom black','rolls royce ghost luxury','rolls royce cullinan suv','rolls royce interior wood','rolls royce hood ornament'],
+  bentley: ['bentley continental gt','bentley flying spur','bentley bentayga suv','bentley interior luxury','bentley engine'],
+  maybach: ['mercedes maybach s class','maybach luxury sedan black','maybach rear seat','maybach interior champagne','maybach exterior'],
+  mercedesmaybach: ['mercedes maybach s680','maybach gls black','maybach rear lounge','maybach interior stars','maybach side profile'],
+  astonmartin: ['aston martin vantage','aston martin db11 green','aston martin dbs silver','aston martin interior','aston martin engine'],
+  porsche: ['porsche 911 carrera','porsche cayenne suv','porsche taycan electric','porsche interior gt','porsche flat six engine'],
+  bmw: ['bmw m3 blue','bmw 5 series silver','bmw x5 suv','bmw interior idrive','bmw engine inline six'],
+  mercedes: ['mercedes benz e class','mercedes amg gt red','mercedes gle suv black','mercedes interior mbux','mercedes engine amg'],
+  audi: ['audi a6 sedan silver','audi q7 suv','audi rs6 avant','audi interior virtual cockpit','audi engine quattro'],
+  jaguar: ['jaguar f-type coupe','jaguar xf sedan','jaguar f-pace suv','jaguar interior wood','jaguar engine supercharged'],
+  landrover: ['land rover defender offroad','range rover luxury black','land rover discovery mud','land rover interior','range rover engine'],
+  rangeroversv: ['range rover sv autobiography','range rover luxury black','range rover sv interior','range rover sv rear','range rover sv side'],
+  toyota: ['toyota camry sedan','toyota land cruiser','toyota gr supra yellow','toyota interior','toyota engine hybrid'],
+  honda: ['honda civic sedan red','honda accord silver','honda cr-v suv','honda interior','honda engine vtec'],
+  volkswagen: ['volkswagen golf gti','volkswagen passat sedan','volkswagen tiguan suv','volkswagen interior','volkswagen engine tsi'],
+  bmwm: ['bmw m3 competition blue','bmw m5 cs','bmw m4 coupe','bmw m interior','bmw s58 engine'],
+  tesla: ['tesla model s electric','tesla model 3 white','tesla model x falcon wing','tesla interior touchscreen','tesla motor electric'],
+  teslaplaid: ['tesla model s plaid black','tesla plaid track','tesla model x plaid','tesla interior 17 screen','tesla motor'],
+  lada: ['lada vesta sedan','lada granta russia','lada niva offroad','lada interior','lada engine'],
+  uaz: ['uaz patriot offroad','uaz hunter russia','uaz military truck','uaz interior','uaz engine diesel'],
+  kia: ['kia stinger red','kia sportage suv','kia k8 sedan','kia interior','kia engine'],
+  hyundai: ['hyundai elantra sedan','hyundai tucson suv','hyundai ioniq 5 electric','hyundai interior','hyundai engine'],
+  ford: ['ford mustang muscle car','ford f-150 pickup truck','ford explorer suv','ford interior','ford coyote engine'],
+  dodge: ['dodge charger hellcat','dodge challenger widebody','dodge durango srt','dodge interior','dodge hemi engine'],
+  chevrolet: ['chevrolet camaro ss','chevrolet corvette c8','chevrolet suburban black','chevrolet interior','chevrolet ls engine'],
+  lexus: ['lexus is sedan','lexus lx suv black','lexus lc coupe','lexus interior mark levinson','lexus engine'],
+  lexusf: ['lexus rc f coupe','lexus is 500 red','lexus lfa supercar','lexus f interior','lexus v8 engine'],
+  lexusls: ['lexus ls 500 sedan','lexus ls luxury interior','lexus ls rear','lexus ls front grille','lexus ls engine'],
+  infiniti: ['infiniti q50 sedan','infiniti qx80 suv','infiniti q60 coupe','infiniti interior','infiniti engine'],
+  subaru: ['subaru wrx sti blue','subaru forester suv','subaru outback wagon','subaru interior','subaru boxer engine'],
+  subaruwrx: ['subaru wrx sti rally','subaru wrx blue track','subaru sti wing','subaru wrx interior','subaru ej20 engine'],
+  mitsubishi: ['mitsubishi lancer evo','mitsubishi outlander suv','mitsubishi pajero offroad','mitsubishi interior','mitsubishi engine'],
+  mitsubevo: ['mitsubishi evo x blue','mitsubishi evo rally','mitsubishi evo rear wing','mitsubishi evo interior recaro','mitsubishi 4b11 engine'],
+  nissan: ['nissan gt-r nismo','nissan skyline japanese','nissan patrol suv','nissan interior','nissan engine'],
+  nissannismo: ['nissan gt-r track','nissan gtr silver','nissan 400z nismo','nissan nismo interior','nissan rb26 engine'],
+  mazda: ['mazda mx-5 roadster','mazda3 sedan','mazda cx-5 suv red','mazda interior','mazda engine rotary'],
+  skoda: ['skoda octavia vrs sedan','skoda superb wagon','skoda kodiaq suv','skoda interior','skoda engine'],
+  volvo: ['volvo xc90 suv','volvo s90 sedan','volvo xc60 interior','volvo safety','volvo engine'],
+  maserati: ['maserati ghibli sedan','maserati levante suv','maserati mc20 supercar','maserati interior','maserati engine v6'],
+  alfaromeo: ['alfa romeo giulia sedan','alfa romeo stelvio suv','alfa romeo gtv coupe','alfa romeo interior','alfa romeo engine'],
+  genesis: ['genesis g80 sedan','genesis gv80 suv','genesis g70 sport','genesis interior','genesis engine'],
+  genesisg90: ['genesis g90 luxury sedan','genesis g90 rear seat','genesis g90 interior','genesis g90 front','genesis g90 side'],
+  polestar: ['polestar 2 electric','polestar 1 coupe','polestar interior','polestar charging','polestar motor electric'],
+  polestarperf: ['polestar performance track','polestar 2 bst','polestar interior sport','polestar motor dual','polestar drift'],
+  alpine: ['alpine a110 french blue','alpine sports car coupe','alpine a110 interior','alpine engine','alpine track'],
+  default_budget: ['city car small hatchback road','compact car city street','economy car parking','budget car interior','city car engine small'],
+  default_mid: ['sedan car road drive','mid sedan highway','family car suv parking','comfortable car interior','car engine 2 liter'],
+  default_good: ['luxury sedan night city','premium car showroom','luxury car interior leather','performance car road','car sport exhaust'],
+  default_exotic: ['exotic supercar garage showroom','hypercar black road','supercar interior carbon','supercar engine bay','supercar rear diffuser'],
+};
 
-function generatePhotos(brand: string, model: string): string[] {
-  return CAR_PHOTO_THEMES.map((_, i) => 
-    `https://picsum.photos/seed/${brand.replace(/\s/g,'')}-${model.replace(/\s/g,'')}-${i}/800/500`
-  );
+function getPhotoQuery(brandId: string, tier: CarTier): string[] {
+  if (BRAND_PHOTO_QUERIES[brandId]) return BRAND_PHOTO_QUERIES[brandId];
+  if (tier === 'нищие' || tier === 'хуже_среднего') return BRAND_PHOTO_QUERIES['default_budget'];
+  if (tier === 'средние') return BRAND_PHOTO_QUERIES['default_mid'];
+  if (tier === 'хорошие') return BRAND_PHOTO_QUERIES['default_good'];
+  return BRAND_PHOTO_QUERIES['default_exotic'];
+}
+
+function generatePhotos(brandId: string, tier: CarTier, index: number): string[] {
+  const queries = getPhotoQuery(brandId, tier);
+  return queries.map((q, i) => {
+    const seed = `${brandId}-${index}-${i}`;
+    const encoded = encodeURIComponent(q);
+    return `https://source.unsplash.com/800x500/?${encoded}&sig=${seed}`;
+  });
 }
 
 function generateCars(): Car[] {
@@ -455,7 +517,7 @@ function generateCars(): Car[] {
         mileage,
         condition,
         tier: brand.tier,
-        photos: generatePhotos(brand.name, `${model}-${year}`),
+        photos: generatePhotos(brand.id, brand.tier, id),
         generation,
         engineVolume: parseFloat((rnd(10, 60) / 10).toFixed(1)),
         power: rnd(minPow, maxPow),
